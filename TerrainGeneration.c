@@ -2,94 +2,240 @@
 #include <stdlib.h>
 #include <time.h>
 
-int main(int argc, char *argv[]){
+typedef struct table_t{
+char map[21][80];
+}table_t;
+void mapbuilder(table_t *m){
+  int i,j;
+  for(i = 0; i < 21; i++){
+      for(j = 0; j < 80; j++){
+          if(i == 0|| i == 20 || j == 0|| j == 79)
+          {
+              m->map[i][j] = '%';
 
-    srand(time(NULL));
-    char map[21][80];
-    int i,j;
-    for(i = 0; i < 21; i++){
-        for(j = 0; j < 80; j++){
-            if(i == 0|| i == 20 || j == 0|| j == 79)
-            {
-                map[i][j] = '%';
-              
-            }else{
-                map[i][j] = ' ';
-            }
-            
-        }
-    }
-    //possible bug if one of the random values are within
-    int N = rand()% 78 + 1;
-    int S = rand()% 78 + 1;
-    int E = rand()% 19 + 1;
-    int W = rand()% 19 + 1;
-    //Make sure the bounds of ranX and Y are properly defined so that it does not go of the map 
-    int ranX = rand()% 78 + 1;
-    int ranY = rand()% 19 + 1;
-    int x_diff = E - W;
-    int x_t_diff = E - W;
-    int y_diff= N - S;
-    int y_t_diff = N - S;
-    printf("X difference: %d, Y difference: %d\n",x_diff,y_diff);
-    printf("N:%d, S:%d\n",N,S);
-    printf("E:%d, W:%d, ranY: %d\n",E,W,ranY);
-    map[0][N] = '#';
-    map[20][S] = '#';
-    map[E][0] = '#';
-    map[W][79] = '#';
-    int k = 79;
+          }else{
+              m->map[i][j] = ' ';
+          }
 
-    //Makes path along East to West
-    
-    for(i = 0; i < 21; i++){
-        for(j = 0; j < 80; j++){
-            if(i == E && j < ranX && j > 0){
-                map[E][j] = '#';
-            }
-            if(E > W &&  x_diff>= 0){
-                map[E-x_diff][ranX] = '#';
-                x_diff--;
-            }else if(E < W && x_diff <= 0){
-                map[E-x_diff][ranX] = '#';
-                x_diff++;
-            }
-            if(k > ranX)
-            {
-                map[W][k] = '#';
-                k--;
-            }
-        }
-    }
-
-    //makes path along West to East
-int f = 20;
-for(i = 0; i < 21; i++){
-    for(j = 0; j < 80; j++){
-        if(j == N && i <= ranY && i > 0){
-            map[i][N] = '#';
-        }
-
-        if(N > S && y_diff > 0){
-               map[ranY][N-y_diff] = '#';
-               y_diff--;
-
-           }else if(N < S && y_diff < 0){
-               map[ranY][N-y_diff] = '#';
-               y_diff++;
-           }
-
-        if(f > ranY)
-             map[f][S] = '#';
-             f--;
-    }
+      }
+  }
 }
+void pathbuilder(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
 
+  int x_diff = E - W;
+  int x_t_diff = E - W;
+  int y_diff= N - S;
+  int y_t_diff = N - S;
+  //printf("X difference: %d, Y difference: %d\n",x_diff,y_diff);
+  //printf("N:%d, S:%d\n",N,S);
+  //printf("E:%d, W:%d, ranY: %d\n",E,W,ranY);
+  m ->map[0][N] = '#';
+  m ->map[20][S] = '#';
+  m ->map[E][0] = '#';
+  m ->map[W][79] = '#';
+  int k = 79;
+  int i,j;
+  for(i = 0; i < 21; i++){
+      for(j = 0; j < 80; j++){
+          if(i == E && j <= ranX && j > 0){
+              m->map[E][j] = '#';
+          }
+          if(E > W &&  x_diff>= 0){
+              m ->map[E-x_diff][ranX] = '#';
+              x_diff--;
+          }else if(E < W && x_diff <= 0){
+              m ->map[E-x_diff][ranX] = '#';
+              x_diff++;
+          }
+          if(k > ranX)
+          {
+              m ->map[W][k] = '#';
+              k--;
+          }
+      }
+  }
+  int f = 20;
+  for(i = 0; i < 21; i++){
+      for(j = 0; j < 80; j++){
+          if(j == N && i <= ranY && i > 0){
+               m ->map[i][N] = '#';
+          }
 
+          if(N > S && y_diff > 0){
+               m ->map[ranY][N-y_diff] = '#';
+                 y_diff--;
 
+             }else if(N < S && y_diff < 0){
+               m ->map[ranY][N-y_diff] = '#';
+                 y_diff++;
+             }
+
+          if(f > ranY)
+               m ->map[f][S] = '#';
+               f--;
+      }
+  }
+}
+void buildingadd(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
+  int i,j;
+  srand(time(NULL));
+  //Pokemon center will be on N S road and Pokemon mart will be on E W road
+  int cloc = rand()%(ranX-2)+1;
+  if(cloc == E|| cloc == W)
+  {
+    cloc += 4;
+  }else if((cloc -1) == E|| (cloc - 1) == W)
+  {
+    cloc+=4;
+  }
+
+  int mloc = rand()%(ranY-2)+1;
+  if(mloc == S){
+    mloc -= 2;
+  }else if(mloc+1 == S){
+    mloc--;
+  }
+  //printf("Center Location: %d\n Mart Location: %d\n",cloc,mloc);
+//finds location for center
+for(i = 0; i < 2; i++){
+  m ->map[mloc+i][N+2] = 'C';
+  m ->map[mloc+i][N+1] = 'C';
+}
+for(i = 0; i < 2; i++){
+  m ->map[E+2][cloc+i] = 'M';
+  m ->map[E+1][cloc+i] = 'M';
+}
+}
+void grass_add(table_t *m){
+  srand(time(NULL));
+  int i,j,k;
+  int tall_grass_x = rand()%3+28;
+  int tall_grass_y = rand()%3+10;
+
+  //printf("tall_grass_x %d, tall_grass_y %d\n",tall_grass_x,tall_grass_y);
+  k = rand()% 2;
+  //Adds tall grass region 1 which is top left corner
+  while(tall_grass_y > 0 && tall_grass_x > 0)
+  {
+      if(m ->map[tall_grass_y][k] == ' ')
+      {
+        m ->map[tall_grass_y][k] = ':';
+      }
+      if(k == tall_grass_x){
+        tall_grass_y--;
+        tall_grass_x = rand()%21+40;
+        k = rand() % 2;
+      }
+    k++;
+  }
+  //Adds tall grass region 2 which is bottom right corner
+  tall_grass_y = 19;
+  tall_grass_x = 79;
+  //printf("second tall_grass_x %d, second tall_grass_y %d\n",tall_grass_x,tall_grass_y);
+  k = 45;
+  while(tall_grass_y >= 10 && tall_grass_x > 40)
+  {
+      if(m ->map[tall_grass_y][k] == ' ')
+      {
+        m ->map[tall_grass_y][k] = ':';
+      }
+      if(k == tall_grass_x){
+        tall_grass_y--;
+        tall_grass_x = 78;
+        k = rand()%5+45;
+      }
+    k++;
+  }
+}
+void clearing_builder(table_t *m){
+  srand(time(NULL));
+  int i,j,k;
+  int x_clearing = rand()%3+28;
+  int y_clearing = rand()%2+17;
+
+  //printf("x_clearing %d, y_clearing %d\n",x_clearing,y_clearing);
+  k = rand()% 2;
+  //Adds clearing to bottom left corner
+  while(y_clearing > 0 && x_clearing > 0)
+  {
+      if(m ->map[y_clearing][k] == ' ')
+      {
+        m ->map[y_clearing][k] = '.';
+      }
+      if(k == x_clearing){
+        y_clearing--;
+        x_clearing = rand()%21+40;
+        k = rand() % 2;
+      }
+    k++;
+  }
+  y_clearing = rand()%3+10;
+  x_clearing = 79;
+  //printf("second x_clearing %d, second y_clearing %d\n",x_clearing,y_clearing);
+  k = 45;
+  while(y_clearing >= 0 && x_clearing > 40)
+  {
+      if(m ->map[y_clearing][k] == ' ')
+      {
+        m ->map[y_clearing][k] = '.';
+      }
+      if(k == x_clearing){
+        y_clearing--;
+        x_clearing = 78;
+        k = rand()%5+45;
+      }
+    k++;
+  }
+
+}
+void trees_boulders(table_t *m){
+  int i,j;
+  srand(time(NULL));
+  int ranNum = rand()%1;
+  for(i = 0; i < 21; i++){
+    for(j = 0; j < 80; j++){
+      if(m ->map[i][j] == ' ')
+      {
+        if(ranNum == 0){
+            m ->map[i][j] = '^';
+        }else{
+            m ->map[i][j] = '%';
+        }
+      }
+      ranNum = rand()%2;
+    }
+  }
+}
+int main(int argc, char *argv[]){
+  srand(time(NULL));
+  //make sure that the roads have a 4x4 distance between them so that the buidlings have space between them.
+  //prevent the roads from being close to the walls
+  int N = rand()% 34+40;
+  int S = rand()% 74 + 5;
+  int E = rand()% 13 + 5;
+  int W = rand()% 13 + 5;
+  //Make sure the bounds of ranX and Y are properly defined so that it does not go of the map
+  int ranX = rand()% 69 + 10;
+  int ranY = rand()% 14 + 5;
+  if(abs(E - ranY) <= 1)
+  {
+    ranY+=2;
+  }
+  if(abs(N - ranX) <= 1){
+    ranX++;
+  }
+    //intitialize 2d array struct
+    table_t* map = malloc(sizeof(table_t));
+    int i,j;
+    mapbuilder(map);
+    pathbuilder(map,N,S,E,W,ranX,ranY);
+    buildingadd(map,N,S,E,W,ranX,ranY);
+    grass_add(map);
+    clearing_builder(map);
+    trees_boulders(map);
     for(i = 0; i < 21; i++){
         for(j = 0; j < 80; j++){
-            printf("%c ", map[i][j]);
+            printf("%c", map->map[i][j]);
         }
         printf("\n");
     }
