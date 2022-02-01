@@ -1,0 +1,2 @@
+1/29/22: Created path builder to help connect exits
+1/31/22: Created function to add Pokemon Cart and Pokemon Mart. Also added function to add grass,clearing,tree and boulder regions

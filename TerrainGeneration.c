@@ -16,16 +16,14 @@ void mapbuilder(table_t *m){
           }else{
               m->map[i][j] = ' ';
           }
-
       }
   }
 }
+
 void pathbuilder(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
 
   int x_diff = E - W;
-  int x_t_diff = E - W;
   int y_diff= N - S;
-  int y_t_diff = N - S;
   //printf("X difference: %d, Y difference: %d\n",x_diff,y_diff);
   //printf("N:%d, S:%d\n",N,S);
   //printf("E:%d, W:%d, ranY: %d\n",E,W,ranY);
@@ -70,14 +68,16 @@ void pathbuilder(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
                  y_diff++;
              }
 
-          if(f > ranY)
-               m ->map[f][S] = '#';
-               f--;
+          if(f > ranY){
+            m ->map[f][S] = '#';
+            f--;
+          }
       }
   }
 }
+
 void buildingadd(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
-  int i,j;
+  int i;
   srand(time(NULL));
   //Pokemon center will be on N S road and Pokemon mart will be on E W road
   int cloc = rand()%(ranX-2)+1;
@@ -106,9 +106,10 @@ for(i = 0; i < 2; i++){
   m ->map[E+1][cloc+i] = 'M';
 }
 }
+
 void grass_add(table_t *m){
   srand(time(NULL));
-  int i,j,k;
+  int k;
   int tall_grass_x = rand()%3+28;
   int tall_grass_y = rand()%3+10;
 
@@ -147,9 +148,10 @@ void grass_add(table_t *m){
     k++;
   }
 }
+
 void clearing_builder(table_t *m){
   srand(time(NULL));
-  int i,j,k;
+  int k;
   int x_clearing = rand()%3+28;
   int y_clearing = rand()%2+17;
 
@@ -181,13 +183,14 @@ void clearing_builder(table_t *m){
       }
       if(k == x_clearing){
         y_clearing--;
-        x_clearing = 78;
+        x_clearing = rand()%3+75;
         k = rand()%5+45;
       }
     k++;
   }
 
 }
+
 void trees_boulders(table_t *m){
   int i,j;
   srand(time(NULL));
@@ -206,6 +209,7 @@ void trees_boulders(table_t *m){
     }
   }
 }
+
 int main(int argc, char *argv[]){
   srand(time(NULL));
   //make sure that the roads have a 4x4 distance between them so that the buidlings have space between them.
