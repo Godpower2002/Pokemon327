@@ -1,2 +1,8 @@
 1/29/22: Created path builder to help connect exits
 1/31/22: Created function to add Pokemon Cart and Pokemon Mart. Also added function to add grass,clearing,tree and boulder regions
+2/1/22: Added bug fixes to path to require minimum distances between paths to 2. Also a bug fix for Mart and Center placement to prevent it from being placed
+over path. There is a possible bug for the mart where it may place the mart on the N->S path but that is a rare occurence.
+2/6/22: Created function to change maps on N S E W coordinates. Refactored TerrainGeneration.h to allow coordinate inputs so the exits are randomly generated in Map2Map.c instead of TerrainGeneration.h
+2/8/22: Added border functionality when generating new maps. Also made sure that it blocked of two sides if the map is generate in the corner of the map. Created neighborCheck function a way of trying to connect newly generated maps with pre-existing maps.
+Added integer values to the singular map struct so that exit locations can be returned from pre-existing maps.
+Added flight functionality but only works from hardcoded values instead of user input.

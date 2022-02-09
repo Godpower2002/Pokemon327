@@ -4,5 +4,5 @@
 #	command to build target from dependencies
 #touch filename.c to rebuild
 
-TerrainGeneration: TerrainGeneration.c
-	gcc TerrainGeneration.c -o TerrainGeneration -Wall -Werror
+Map2Map: Map2Map.c
+	gcc Map2Map.c -o Map2Map -Wall -Werror

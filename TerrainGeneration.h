@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-
 typedef struct table_t{
 char map[21][80];
+int N;
+int S;
+int E;
+int W;
 }table_t;
 void mapbuilder(table_t *m){
   int i,j;
@@ -18,6 +21,20 @@ void mapbuilder(table_t *m){
           }
       }
   }
+}
+int return_exits(table_t *m,char dir){
+  switch(dir){
+    case 'n':
+      return m->N;
+    case 's':
+      return m->S;
+    case 'e':
+      return m->E;
+    case 'w':
+      return m->W;
+
+  }
+  //printf("N:%d S:%d E:%d W:%d\n",m->N,m->S,m->E,m->W);
 }
 
 void pathbuilder(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
@@ -83,7 +100,7 @@ void buildingadd(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
   //Check to see if building is being added to path.
   //also allow the marts to be added to other sides.
   int cloc = rand()%(ranX-2)+1;
-  
+
   if(cloc == E|| cloc == W||m ->map[E+2][cloc] != ' '||m ->map[E+1][cloc+1] != ' ')
   {
     cloc += 4;
@@ -94,22 +111,15 @@ void buildingadd(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
 
 
   int mloc = rand()%(ranY-2)+1;
-  
+
   if(mloc == S || m ->map[mloc][N+2] != ' '||m ->map[mloc+1][N+1] != ' '){
-    mloc -= 4; 
+    mloc -= 4;
   }else if((mloc - 1) == S || (mloc - 1) == N )
   {
     mloc-= 4;
   }
-  /*
-  else if(mloc+1 == S){
-    mloc -= 2;
-  }else if(ranX == m->map[mloc][N+2])
-  {
-    mloc++;
-  }
-*/
-  
+
+
 
   //printf("Center Location: %d\n Mart Location: %d\n",cloc,mloc);
 //finds location for center
@@ -131,6 +141,7 @@ void grass_add(table_t *m){
 
   //printf("tall_grass_x %d, tall_grass_y %d\n",tall_grass_x,tall_grass_y);
   k = rand()% 2;
+  //BUG REDUCE REGION SIZES
   //Adds tall grass region 1 which is top left corner
   while(tall_grass_y > 0 && tall_grass_x > 0)
   {
@@ -226,18 +237,15 @@ void trees_boulders(table_t *m){
   }
 }
 
-int main(int argc, char *argv[]){
+table_t* mapgen(table_t *x,int N,int S,int E,int W,int rows,int cols){
   srand(time(NULL));
   //make sure that the roads have a 4x4 distance between them so that the buidlings have space between them.
   //prevent the roads from being close to the walls
-  int N = rand()% 34+40;
-  int S = rand()% 74 + 5;
-  int E = rand()% 13 + 5;
-  int W = rand()% 13 + 5;
   //Make sure the bounds of ranX and Y are properly defined so that it does not go of the map
   int ranX = rand()% 69 + 10;
   int ranY = rand()% 12 + 5;
-  printf("RanY: %d E: %d",ranY,E);
+  //BUG fix ranY range so that the # will not be accross the bottom
+ // printf("RanY: %d E: %d",ranY,E);
   if(ranY-E < 3)
   {
     ranY+=4;
@@ -249,20 +257,18 @@ int main(int argc, char *argv[]){
   {
     W++;
   }
-   printf(" POST RanY: %d E: %d\n",ranY,E);
+  x->N = N;
+  x->S = S;
+  x->E = E;
+  x->W = W;
+  // printf(" POST RanY: %d E: %d\n",ranY,E);
     //intitialize 2d array struct
-    table_t* map = malloc(sizeof(table_t));
     int i,j;
-    mapbuilder(map);
-    pathbuilder(map,N,S,E,W,ranX,ranY);
-    buildingadd(map,N,S,E,W,ranX,ranY);
-    grass_add(map);
-    clearing_builder(map);
-    trees_boulders(map);
-    for(i = 0; i < 21; i++){
-        for(j = 0; j < 80; j++){
-            printf("%c", map->map[i][j]);
-        }
-        printf("\n");
-    }
+    mapbuilder(x);
+    pathbuilder(x,N,S,E,W,ranX,ranY);
+    buildingadd(x,N,S,E,W,ranX,ranY);
+    grass_add(x);
+    clearing_builder(x);
+    trees_boulders(x);
+  return x;
 }
