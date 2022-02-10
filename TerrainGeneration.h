@@ -93,44 +93,59 @@ void pathbuilder(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
   }
 }
 
-void buildingadd(table_t *m,int N,int S,int E,int W,int ranX,int ranY){
+void buildingadd(table_t *m,int N,int S,int E,int W,int ranX,int ranY,int rows,int cols){
   int i;
   srand(time(NULL));
   //Pokemon center will be on N S road and Pokemon mart will be on E W road
   //Check to see if building is being added to path.
   //also allow the marts to be added to other sides.
-  int cloc = rand()%(ranX-2)+1;
+  //TODO ADD Probility for mart and center here
+  double prob;
+  if(rows > cols){
+    prob = 100*(10/(double)abs(rows));
+  }else{
+    prob = 100*(10/(double)abs(cols));
+  }
+    int random = rand()%100+1;
+    
+  if(random > prob || (rows == 199 && cols == 199)){
 
-  if(cloc == E|| cloc == W||m ->map[E+2][cloc] != ' '||m ->map[E+1][cloc+1] != ' ')
-  {
-    cloc += 4;
-  }else if((cloc -1) == E|| (cloc - 1) == W)
-  {
-    cloc += 4;
+
+    int cloc = rand()%(ranX-2)+1;
+
+    if(cloc == E|| cloc == W||m ->map[E+2][cloc] != ' '||m ->map[E+1][cloc+1] != ' ')
+    {
+      cloc += 4;
+    }else if((cloc -1) == E|| (cloc - 1) == W)
+    {
+      cloc += 4;
+    }
+
+
+    int mloc = rand()%(ranY-2)+1;
+
+    if(mloc == S || m ->map[mloc][N+2] != ' '||m ->map[mloc+1][N+1] != ' '){
+      mloc -= 4;
+    }else if((mloc - 1) == S || (mloc - 1) == N )
+    {
+      mloc-= 4;
+    }
+
+
+
+    //printf("Center Location: %d\n Mart Location: %d\n",cloc,mloc);
+  //finds location for center
+  for(i = 0; i < 2; i++){
+    m ->map[mloc+i][N+2] = 'C';
+    m ->map[mloc+i][N+1] = 'C';
+  }
+  for(i = 0; i < 2; i++){
+    m ->map[E+2][cloc+i] = 'M';
+    m ->map[E+1][cloc+i] = 'M';
+  }
   }
 
 
-  int mloc = rand()%(ranY-2)+1;
-
-  if(mloc == S || m ->map[mloc][N+2] != ' '||m ->map[mloc+1][N+1] != ' '){
-    mloc -= 4;
-  }else if((mloc - 1) == S || (mloc - 1) == N )
-  {
-    mloc-= 4;
-  }
-
-
-
-  //printf("Center Location: %d\n Mart Location: %d\n",cloc,mloc);
-//finds location for center
-for(i = 0; i < 2; i++){
-  m ->map[mloc+i][N+2] = 'C';
-  m ->map[mloc+i][N+1] = 'C';
-}
-for(i = 0; i < 2; i++){
-  m ->map[E+2][cloc+i] = 'M';
-  m ->map[E+1][cloc+i] = 'M';
-}
 }
 
 void grass_add(table_t *m){
@@ -253,10 +268,12 @@ table_t* mapgen(table_t *x,int N,int S,int E,int W,int rows,int cols){
   if(abs(N - ranX) <= 2){
     ranX+=2;
   }
+  /*
   if(abs(E-W)|| abs(W-E) <= 2)
   {
     W++;
   }
+  */
   x->N = N;
   x->S = S;
   x->E = E;
@@ -266,7 +283,7 @@ table_t* mapgen(table_t *x,int N,int S,int E,int W,int rows,int cols){
     int i,j;
     mapbuilder(x);
     pathbuilder(x,N,S,E,W,ranX,ranY);
-    buildingadd(x,N,S,E,W,ranX,ranY);
+    buildingadd(x,N,S,E,W,ranX,ranY,rows,cols);
     grass_add(x);
     clearing_builder(x);
     trees_boulders(x);

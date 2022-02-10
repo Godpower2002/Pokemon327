@@ -9,29 +9,30 @@ typedef struct worldmap_t{
   table_t* world[399][399];
 }worldmap_t;
 
+
 int neighborCheck(worldmap_t *worldmap,int rows,int cols, char dir){
 
 
   srand(time(NULL));
   switch(dir){
     case 'n':
-      if(worldmap->world[rows][cols + 1] != NULL){
+      if(worldmap->world[rows + 1][cols] != NULL){
         //takes in neighboring south as north
-          return return_exits(worldmap->world[rows][cols + 1],'s');
+          return return_exits(worldmap->world[rows + 1][cols],'s');
       }else{
           return (rand()% 34+40);
       }
     case 's':
         if(worldmap->world[rows - 1][cols] != NULL){
       //takes neighboring north as south
-          return return_exits(worldmap->world[rows][cols + 1],'n');
+          return return_exits(worldmap->world[rows - 1][cols],'n');
         }else{
           return (rand()% 74 + 5);
         }
     case 'e':
     if(worldmap->world[rows][cols + 1] != NULL){
       //takes neighboring west exit as east exit
-          return return_exits(worldmap->world[rows + 1][cols],'w');
+          return return_exits(worldmap->world[rows][cols + 1],'w');
     }else{
       //randomize east exit
           return (rand()% 13 + 5);
@@ -50,6 +51,32 @@ int neighborCheck(worldmap_t *worldmap,int rows,int cols, char dir){
 
 
 }
+//this function will parse the integers out of input. first space is x second space is y
+int parseX(char x[4]){
+  printf("\n");
+  int parsedX;
+  sscanf(x, "%04d", &parsedX);
+  return parsedX;
+}
+int parseY(char input[20],int second){
+  int i;
+  char posy[4];
+   int count = 0;
+  for(i = second; i < 20; i++)
+  {
+    if((isdigit(input[i]) || input[i] == '-')){
+      posy[count] = input[i];
+
+      count++;
+    }
+  }
+  int parsed;
+  sscanf(posy, "%04d", &parsed);
+  return parsed;
+}
+
+
+
 
 void print_map(table_t* m, int x, int y){
   int i,j;
@@ -130,7 +157,7 @@ int main(int argc, char *argv[]){
   int S = rand()% 74 + 5;
   int E = rand()% 13 + 5;
   int W = rand()% 13 + 5;
-  printf("E before mapgen %d\n",E);
+  //printf("E before mapgen %d\n",E);
   int xCoord = 0;
   int yCoord = 0;
   worldmap->world[199][199] = mapgen(map,N,S,E,W,199,199);
@@ -143,11 +170,10 @@ int main(int argc, char *argv[]){
   int prevN = S;
   int prevE = E;
   int prevW = W;
-  printf("returning exit %d\n",return_exits(worldmap->world[199][199],'w'));
+  //printf("returning exit %d\n",return_exits(worldmap->world[199][199],'w'));
   //printf("PREV W %d\n",prevW);
-  char xPosition[2];
-  char yPosition[2];
-  char command;
+
+
 
 
 
@@ -155,19 +181,9 @@ while(1)
 {
     char c[20];
     fgets(c, 20, stdin);
-    command = c[0];
     int count = 2;
     //use spaces as a buffer. when spaces == 1 count into x char string //Possibly use site bro gave me
-    /*
-    for(i = 0; i < 2; i++)
-    {
-      xPositon[i] = c[count];
-      count++;
-    }
-    xFly = atoi(xPosition);
-    for(i = 0;)
-    //only works with chars for now
-    */
+
     if(c[0] == 'q')
     {
 
@@ -178,15 +194,48 @@ while(1)
     if(c[0] == 'f'){
 
 
-    // should this be signle digits or multiple digits and then added to the actuall 2D array location.
-    /*
-    int xFly = 322;
-    int yFly = 300;
-    xCoord = xFly;
-    yCoord = yFly;
-    rows = yFly + 199;
-    cols = xFly + 199;
-    */
+      char posx[4];
+      char posy[4];
+
+      int count = 0;
+      int spaces = 0;
+      int secondSpace = 0;
+      for(i = 0; i < 20; i++)
+      {
+        if(c[i] == ' '){
+          spaces++;
+          if(spaces == 2){
+            secondSpace = i;
+          }
+        }
+
+        if(spaces == 1 && (c[i] == '-'||isdigit(c[i]))){
+          posx[count] = c[i];
+          count++;
+        }
+
+      }
+    int X = parseX(posx);
+    int Y = parseY(c,secondSpace);
+
+    if(X > 199)
+    {
+      X = 199;
+    }
+    if(Y > 199){
+      Y = 199;
+    }
+    if(X < 0){
+      X = 0;
+    }
+    if(Y < 0){
+      Y = 0;
+    }
+    rows = rows + Y;
+    cols = cols + X;
+    xCoord = X;
+    yCoord = Y;
+     //printf("%d , %d",parse(c,1),parse(c,2));
     if(worldmap->world[rows][cols] == NULL){
       N = neighborCheck(worldmap,rows,cols,'n');
       S = neighborCheck(worldmap,rows,cols,'s');
@@ -209,17 +258,18 @@ while(1)
 
 
 
-    //BUG switch south and north because north is negative y coordinate direction but goes towards row == 399 while south is positive coording y direction but goes towards zero in 2d array
+    //BUG switch south and north variable names because north is negative y coordinate direction but goes towards row == 399 while south is positive coording y direction but goes towards zero in 2d array
     if(c[0] == 's'){
-      rows--;
-      yCoord--;
+      if(rows < 399){
+        rows++;
+        yCoord--;
+      }
       //current issue is that for some reason, the value of north is being changed every iteration
       if(worldmap->world[rows][cols] == NULL && rows >= 0){
         //check neigbors and set current exit based on neighboring exit.
 
         //given south randomize east west and north
         N = neighborCheck(worldmap,rows,cols,'n');
-
         E = neighborCheck(worldmap,rows,cols,'e');
         W = neighborCheck(worldmap,rows,cols,'w');
 
@@ -227,8 +277,8 @@ while(1)
 
 
         table_t* map2 = malloc(sizeof(table_t));
-        if(rows == 0){
-          worldmap->world[rows][cols] = border(mapgen(map2,N,prevS,E,W,rows,cols),'n',rows,cols);
+        if(rows == 0 || rows == 399){
+          worldmap->world[rows][cols] = border(mapgen(map2,N,prevS,E,W,rows,cols),'s',rows,cols);
         }else{
           worldmap->world[rows][cols] = mapgen(map2,N,prevS,E,W,rows,cols);
         }
@@ -246,25 +296,25 @@ while(1)
 
     }else if(c[0] == 'n'){
       //given north randomize west east and south.
-      rows++;
-      yCoord++;
+      if(rows > 0){
+        rows--;
+        yCoord++;
+      }
       if(worldmap->world[rows][cols] == NULL && rows != 399){
 
         S = neighborCheck(worldmap,rows,cols,'s');
         E = neighborCheck(worldmap,rows,cols,'e');
         W = neighborCheck(worldmap,rows,cols,'w');
         //later bug to be fixed
-        if(abs(E-W)|| abs(W-E) <= 2)
-        {
-          W++;
-        }
+
         table_t* map2 = malloc(sizeof(table_t));
-        if(rows == 0){
-          worldmap->world[rows][cols] = border(mapgen(map2,prevN,S,E,W,rows,cols),'s',rows,cols);
+        if(rows == 0 || rows == 399){
+          worldmap->world[rows][cols] = border(mapgen(map2,prevN,S,E,W,rows,cols),'n',rows,cols);
         }else{
           worldmap->world[rows][cols] = mapgen(map2,prevN,S,E,W,rows,cols);
         }
         prevN = S;
+        prevS = N;
         prevE = E;
         prevW = W;
         print_map( worldmap->world[rows][cols],xCoord,yCoord);
@@ -295,8 +345,10 @@ while(1)
         print_map( worldmap->world[rows][cols],xCoord,yCoord);
       }
     }else if(c[0] == 'w'){
-      cols--;
-      xCoord--;
+      if(cols > 0){
+        cols--;
+        xCoord--;
+      }
       if(worldmap->world[rows][cols] == NULL){
         N = neighborCheck(worldmap,rows,cols,'n');
         S = neighborCheck(worldmap,rows,cols,'s');
